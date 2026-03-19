@@ -28,7 +28,6 @@ export const reviews = [
       user: "Phạm Văn D",
     },
   
-    // ✅ PRODUCT 4
     {
       id: 5,
       productId: 4,
@@ -44,7 +43,6 @@ export const reviews = [
       user: "Lan Anh",
     },
   
-    // ✅ PRODUCT 5
     {
       id: 7,
       productId: 5,
@@ -58,5 +56,35 @@ export const reviews = [
       rating: 2,
       comment: "Đóng gói sơ sài",
       user: "Minh Quân",
+    },
+  
+    // 👉 ADD thêm cho pagination
+    {
+      id: 9,
+      productId: 1,
+      rating: 4,
+      comment: "Đóng gói ok",
+      user: "Quang Huy",
+    },
+    {
+      id: 10,
+      productId: 2,
+      rating: 2,
+      comment: "Vải nóng",
+      user: "Mai Anh",
+    },
+    {
+      id: 11,
+      productId: 3,
+      rating: 3,
+      comment: "Tạm ổn",
+      user: "Hải Nam",
+    },
+    {
+      id: 12,
+      productId: 4,
+      rating: 1,
+      comment: "Rất tệ",
+      user: "Minh Tú",
     },
   ];

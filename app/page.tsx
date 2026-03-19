@@ -133,7 +133,7 @@ export default function Home() {
               {/* Actions */}
               <div className="flex gap-2">
 
-                <button className="px-3 py-1 border rounded text-sm hover:bg-gray-100">
+                <button className="px-3 py-1 border rounded text hover:bg-gray-100">
                   Phản hồi
                 </button>
 

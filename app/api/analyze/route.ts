@@ -1,42 +1,50 @@
 import OpenAI from "openai";
-
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { reviews } from "@/data/reviews";
 
 export async function POST(req: Request) {
   try {
-    const { reviews, question } = await req.json();
+    if (!process.env.OPENAI_API_KEY) {
+      return Response.json({ error: "Missing API key" }, { status: 500 });
+    }
+
+    const { question, productId } = await req.json();
+
+    const productReviews = reviews.filter(
+      (r) => r.productId === productId
+    );
+
+    const reviewText = productReviews
+      .map((r) => `- (${r.rating}⭐) ${r.comment}`)
+      .join("\n");
 
     const prompt = `
-Bạn là chuyên gia phân tích feedback khách hàng.
+Bạn là chuyên gia phân tích đánh giá Shopee.
 
-Dữ liệu:
-${reviews.join("\n")}
+Dữ liệu review:
+${reviewText}
+
+Câu hỏi: ${question}
 
 Yêu cầu:
-- Trả lời ngắn gọn
-- Có insight cụ thể
-- Không chung chung
-
-Câu hỏi:
-${question}
+- Trả lời rõ ràng
+- Mỗi ý xuống dòng
+- Dùng bullet hoặc số thứ tự
+- Không viết 1 đoạn dài
 `;
+
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
     const response = await client.responses.create({
       model: "gpt-4.1-mini",
       input: prompt,
     });
 
-    // ✅ SAFE EXTRACT
-    const result =
-      response.output_text ||
-      "Không thể phân tích dữ liệu.";
-
-    return Response.json({ result });
-
-  } catch (error) {
-    console.error("AI ERROR:", error);
-    return new Response("Error", { status: 500 });
+    return Response.json({
+      result: response.output_text,
+    });
+  } catch (err) {
+    return Response.json({ error: "AI failed" }, { status: 500 });
   }
 }
