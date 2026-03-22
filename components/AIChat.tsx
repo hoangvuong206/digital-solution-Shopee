@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { reviews } from "@/data/reviews";
 
 type Message = {
   id: number;
@@ -20,10 +21,63 @@ export default function AIChat({ productId }: Props) {
 
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ AUTO SCROLL
+  // AUTO SCROLL
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // 🔥 ANALYZE TOP ISSUE
+  const getTopIssue = () => {
+    const filtered = reviews.filter((r) => r.productId === productId);
+
+    const issues: Record<string, number> = {
+      "Chất lượng kém": 0,
+      "Size không chuẩn": 0,
+      "Đóng gói kém": 0,
+      "Giao hàng chậm": 0,
+    };
+
+    filtered.forEach((r) => {
+      const c = r.comment.toLowerCase();
+
+      if (c.includes("mỏng") || c.includes("không giống")) {
+        issues["Chất lượng kém"]++;
+      }
+      if (c.includes("size")) {
+        issues["Size không chuẩn"]++;
+      }
+      if (c.includes("đóng gói")) {
+        issues["Đóng gói kém"]++;
+      }
+      if (c.includes("giao hàng")) {
+        issues["Giao hàng chậm"]++;
+      }
+    });
+
+    return Object.entries(issues).sort((a, b) => b[1] - a[1])[0]?.[0];
+  };
+
+  const generateFallbackResponse = () => {
+    const issue = getTopIssue();
+
+    if (issue === "Chất lượng kém") {
+      return "Khách hàng không hài lòng về chất lượng sản phẩm. Bạn nên kiểm tra lại vật liệu hoặc mô tả.";
+    }
+
+    if (issue === "Size không chuẩn") {
+      return "Size đang là vấn đề lớn. Bạn nên cập nhật bảng size rõ ràng hơn.";
+    }
+
+    if (issue === "Đóng gói kém") {
+      return "Đóng gói chưa tốt. Bạn nên cải thiện bao bì để tránh hư hỏng.";
+    }
+
+    if (issue === "Giao hàng chậm") {
+      return "Khách hàng phàn nàn về giao hàng chậm. Bạn nên xem lại đơn vị vận chuyển.";
+    }
+
+    return "Sản phẩm hiện chưa có vấn đề lớn, nhưng bạn vẫn nên theo dõi thêm phản hồi khách hàng.";
+  };
 
   const sendMessage = async (text?: string) => {
     const messageText = text || input;
@@ -60,14 +114,13 @@ export default function AIChat({ productId }: Props) {
 
       setMessages((prev) => [...prev, aiMsg]);
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          role: "assistant",
-          content: "❌ Có lỗi xảy ra",
-        },
-      ]);
+      const aiMsg: Message = {
+        id: Date.now() + 1,
+        role: "assistant",
+        content: generateFallbackResponse(),
+      };
+
+      setMessages((prev) => [...prev, aiMsg]);
     } finally {
       setLoading(false);
     }
@@ -148,21 +201,19 @@ export default function AIChat({ productId }: Props) {
           </div>
         )}
 
-        {/* 👇 AUTO SCROLL TARGET */}
+        {/* AUTO SCROLL */}
         <div ref={chatEndRef} />
       </div>
 
       {/* INPUT */}
       <div className="mt-3 flex gap-2">
         <textarea
-          autoFocus
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              if (loading) return;
-              sendMessage();
+              if (!loading) sendMessage();
             }
           }}
           rows={1}

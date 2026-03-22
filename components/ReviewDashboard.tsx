@@ -94,7 +94,7 @@ export default function ReviewDashboard() {
           <div className="bg-white border rounded p-5 space-y-3">
   
             <div className="text-sm text-gray-600 font-medium">
-              Phân tích chuyên sâu 
+              Phân tích chuyên sâu  ⭐️
             </div>
   
             <div className="border-t"></div>
